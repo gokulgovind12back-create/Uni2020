@@ -1,0 +1,1678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Business Billing Dashboard</title>
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --background: #f3f4f6;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --success: #15803d;
+      --warning: #b45309;
+      --danger: #dc2626;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--background);
+      color: var(--text);
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      border: none;
+      cursor: pointer;
+      border-radius: 7px;
+      padding: 10px 15px;
+    }
+
+    .app-layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 240px;
+      background: #111827;
+      color: white;
+      padding: 24px 16px;
+      position: fixed;
+      height: 100vh;
+      left: 0;
+      top: 0;
+    }
+
+    .sidebar h2 {
+      margin: 0 0 30px;
+      font-size: 21px;
+    }
+
+    .sidebar p {
+      color: #9ca3af;
+      font-size: 13px;
+      margin-bottom: 25px;
+    }
+
+    .nav-button {
+      width: 100%;
+      text-align: left;
+      color: #d1d5db;
+      background: transparent;
+      margin-bottom: 8px;
+    }
+
+    .nav-button:hover,
+    .nav-button.active {
+      background: #1f2937;
+      color: white;
+    }
+
+    .main-content {
+      width: calc(100% - 240px);
+      margin-left: 240px;
+      padding: 25px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .topbar h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    .company-name {
+      color: var(--primary);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .btn-danger {
+      background: #fee2e2;
+      color: var(--danger);
+    }
+
+    .btn-success {
+      background: #dcfce7;
+      color: var(--success);
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-bottom: 25px;
+    }
+
+    .stat-card,
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border);
+    }
+
+    .stat-card small {
+      color: var(--muted);
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    .stat-card h2 {
+      margin: 0;
+      font-size: 25px;
+    }
+
+    .stat-card p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .filter-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .filter-row select,
+    .filter-row input {
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 9px;
+    }
+
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 25px;
+    }
+
+    .product-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .product-list li {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 13px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .product-list li:last-child {
+      border-bottom: none;
+    }
+
+    .product-value {
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 800px;
+    }
+
+    th,
+    td {
+      padding: 13px 10px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      font-size: 13px;
+      color: var(--muted);
+      background: #f9fafb;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .status.paid {
+      color: var(--success);
+      background: #dcfce7;
+    }
+
+    .status.pending {
+      color: var(--warning);
+      background: #fef3c7;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 20;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-content {
+      width: min(760px, 100%);
+      max-height: 94vh;
+      overflow-y: auto;
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+    }
+
+    .close-button {
+      background: transparent;
+      font-size: 25px;
+      padding: 0 5px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+
+    .form-group label {
+      font-size: 13px;
+      font-weight: bold;
+      color: #374151;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 10px;
+    }
+
+    .invoice-items {
+      margin-top: 22px;
+      margin-bottom: 15px;
+    }
+
+    .invoice-item {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr auto;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .invoice-item input {
+      min-width: 0;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 9px;
+    }
+
+    .invoice-summary {
+      border-top: 1px solid var(--border);
+      padding-top: 15px;
+      margin-top: 15px;
+      text-align: right;
+    }
+
+    .invoice-summary div {
+      margin: 8px 0;
+    }
+
+    .invoice-summary strong {
+      font-size: 18px;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .invoice-preview {
+      width: min(850px, 100%);
+      background: white;
+      padding: 35px;
+      border-radius: 8px;
+    }
+
+    .invoice-preview-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      border-bottom: 2px solid #111827;
+      padding-bottom: 20px;
+      margin-bottom: 20px;
+    }
+
+    .invoice-preview h1,
+    .invoice-preview h2,
+    .invoice-preview p {
+      margin-top: 0;
+    }
+
+    .invoice-preview table {
+      min-width: 0;
+      margin-top: 25px;
+    }
+
+    .invoice-preview .total-box {
+      margin-left: auto;
+      width: 300px;
+      margin-top: 20px;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: var(--muted);
+      padding: 30px 10px;
+    }
+
+    @media (max-width: 1000px) {
+      .dashboard-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 750px) {
+      .sidebar {
+        width: 70px;
+        padding: 18px 8px;
+      }
+
+      .sidebar h2 {
+        font-size: 0;
+      }
+
+      .sidebar h2::after {
+        content: "B";
+        font-size: 23px;
+      }
+
+      .sidebar p,
+      .nav-button span {
+        display: none;
+      }
+
+      .nav-button {
+        text-align: center;
+        font-size: 20px;
+      }
+
+      .main-content {
+        width: calc(100% - 70px);
+        margin-left: 70px;
+        padding: 15px;
+      }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .analytics-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-group.full {
+        grid-column: auto;
+      }
+
+      .invoice-item {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .invoice-item input:first-child {
+        grid-column: 1 / -1;
+      }
+    }
+
+
+    .nav-button { display:flex; align-items:center; gap:10px; font-size:15px; }
+    .nav-button .nav-icon { width:24px; text-align:center; flex:none; }
+    .nav-button span { display:inline !important; }
+    .sidebar { overflow-y:auto; }
+    .main-content section { max-width: 1500px; }
+    .table-wrapper table { min-width: 680px; }
+    .balance-positive { color: var(--warning); font-weight: 700; }
+    .balance-clear { color: var(--success); font-weight: 700; }
+    .helper-text { color:var(--muted); font-size:13px; margin:6px 0 16px; }
+    @media (max-width: 750px) {
+      .sidebar { width:100%; height:auto; min-height:0; position:sticky; top:0; z-index:10; padding:10px; display:flex; flex-wrap:wrap; gap:5px; }
+      .sidebar h2 { font-size:16px; margin:0 10px 5px 4px; }
+      .sidebar h2::after { content:none; }
+      .sidebar p { display:none; }
+      .nav-button { width:auto; flex:1 0 auto; justify-content:center; margin:0; padding:9px 10px; font-size:13px; }
+      .nav-button span { display:inline !important; }
+      .nav-button .nav-icon { display:none; }
+      .main-content { width:100%; margin:0; padding:14px; }
+      .topbar h1 { font-size:22px; }
+      .dashboard-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+      .stat-card { padding:14px; }
+      .stat-card h2 { font-size:19px; }
+    }
+    @media (max-width: 420px) {
+      .nav-button { flex:1 1 30%; }
+      .dashboard-grid { grid-template-columns:1fr 1fr; }
+    }
+
+    @media print {
+      @page { size: A4; margin: 12mm; }
+
+      html, body { background: #fff !important; height: auto !important; }
+
+      /* remove the whole app from the layout so it cannot create an extra page */
+      .app-layout,
+      .modal:not(#previewModal) { display: none !important; }
+
+      #previewModal {
+        position: static !important;
+        display: block !important;
+        background: none !important;
+        padding: 0 !important;
+        inset: auto !important;
+      }
+
+      #invoicePreview {
+        position: static !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+      }
+
+      #invoicePreview .modal-actions { display: none !important; }
+
+      #invoicePreview,
+      #invoicePreview table,
+      #invoicePreview .total-box,
+      #invoicePreview .invoice-preview-header { page-break-inside: avoid; break-inside: avoid; }
+
+      #invoicePreview p { margin-bottom: 6px; }
+      #invoicePreview h1 { font-size: 24px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <h2>Billing System</h2>
+      <p>Business billing dashboard</p>
+
+      <button class="nav-button active" onclick="showDashboard()"><span class="nav-icon">📊</span><span>Dashboard</span></button>
+      <button class="nav-button" onclick="openInvoiceModal()"><span class="nav-icon">🧾</span><span>Create Invoice</span></button>
+      <button class="nav-button" onclick="showSection('customersSection')"><span class="nav-icon">👥</span><span>Customers</span></button>
+      <button class="nav-button" onclick="showSection('suppliersSection')"><span class="nav-icon">🏭</span><span>Suppliers</span></button>
+      <button class="nav-button" onclick="showSection('inventorySection')"><span class="nav-icon">📦</span><span>Inventory</span></button>
+      <button class="nav-button" onclick="showSection('supplierBillsSection')"><span class="nav-icon">🛒</span><span>Purchases</span></button>
+      <button class="nav-button" onclick="openCompanyModal()"><span class="nav-icon">⚙️</span><span>Settings</span></button>
+    </aside>
+
+    <main class="main-content">
+      <div class="topbar">
+        <div>
+          <h1><span class="company-name" id="companyNameDisplay">Your Company</span></h1>
+          <p style="color: #6b7280;">Business billing dashboard</p>
+        </div>
+
+        <button class="btn-primary" onclick="openInvoiceModal()">
+          + Create Invoice
+        </button>
+      </div>
+
+      <section id="dashboardSection">
+        <div class="section-title"><h2>Business Overview</h2><span style="color:#6b7280;font-size:13px">Sales, collections and outstanding balances</span></div>
+        <div class="dashboard-grid">
+          <div class="stat-card">
+            <small>Today's Sales</small>
+            <h2 id="todaySales">AED 0.00</h2>
+            <p>Paid invoices today</p>
+          </div>
+
+          <div class="stat-card">
+            <small>Today's Receivables</small>
+            <h2 id="todayReceivables">AED 0.00</h2>
+            <p>Unpaid invoice balance</p>
+          </div>
+
+          <div class="stat-card">
+            <small>This Week's Sales</small>
+            <h2 id="weekSales">AED 0.00</h2>
+            <p>Paid invoices this week</p>
+          </div>
+
+          <div class="stat-card">
+            <small>This Month's Sales</small>
+            <h2 id="monthSales">AED 0.00</h2>
+            <p>Paid invoices this month</p>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 25px;">
+          <div class="section-title">
+            <h2>Sales and Receivables Overview</h2>
+
+            <div class="filter-row">
+              <label for="analyticsPeriod">Period:</label>
+              <select id="analyticsPeriod" onchange="renderDashboard()">
+                <option value="day">Today</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="dashboard-grid" style="margin-bottom: 0;">
+            <div class="stat-card">
+              <small>Selected Period Sales</small>
+              <h2 id="selectedSales">AED 0.00</h2>
+            </div>
+
+            <div class="stat-card">
+              <small>Selected Period Receivables</small>
+              <h2 id="selectedReceivables">AED 0.00</h2>
+            </div>
+
+            <div class="stat-card">
+              <small>Invoices</small>
+              <h2 id="selectedInvoices">0</h2>
+            </div>
+
+            <div class="stat-card">
+              <small>Items Sold</small>
+              <h2 id="selectedItems">0</h2>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-title"><h2>Product Performance</h2><span style="color:#6b7280;font-size:13px">Based on invoice quantities</span></div>
+        <div class="analytics-grid">
+          <div class="card">
+            <div class="section-title">
+              <h2>Best-Selling Products</h2>
+            </div>
+            <ul class="product-list" id="bestSellingList"></ul>
+          </div>
+
+          <div class="card">
+            <div class="section-title">
+              <h2>Least-Selling Products</h2>
+            </div>
+            <ul class="product-list" id="leastSellingList"></ul>
+          </div>
+        </div>
+
+        <div class="section-title"><h2>Invoice Register</h2><span style="color:#6b7280;font-size:13px">View, edit or delete invoices</span></div>
+        <div class="card">
+          <div class="section-title">
+            <h2>Invoices</h2>
+            <button class="btn-secondary" onclick="renderInvoices()">Refresh</button>
+          </div>
+
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Invoice No.</th>
+                  <th>Date</th>
+                  <th>Customer</th>
+                  <th>Total</th>
+                  <th>Tax</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="invoiceTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+      <section id="customersSection" style="display:none">
+        <div class="card">
+          <div class="section-title"><h2>Customers</h2><button class="btn-primary" onclick="addCustomer()">+ Add Customer</button></div>
+          <p class="helper-text">Receivables are calculated from unpaid invoices plus opening balances. Payables are opening balances you record for each customer.</p>
+          <div class="table-wrapper"><table><thead><tr><th>Customer</th><th>Phone</th><th>VAT No.</th><th>Receivables</th><th>Payables</th><th>Actions</th></tr></thead><tbody id="customerBody"></tbody></table></div>
+        </div>
+      </section>
+      <section id="inventorySection" style="display:none">
+        <div class="card"><div class="section-title"><h2>Inventory</h2><button class="btn-primary" onclick="addProduct()">+ Add Product</button></div>
+        <div class="table-wrapper"><table><thead><tr><th>Product</th><th>SKU</th><th>Supplier</th><th>Stock</th><th>Buying Rate (AED)</th><th>Selling Rate (AED)</th><th>Actions</th></tr></thead><tbody id="inventoryBody"></tbody></table></div></div>
+      </section>
+      <section id="suppliersSection" style="display:none">
+        <div class="card"><div class="section-title"><h2>Suppliers</h2><button class="btn-primary" onclick="addSupplier()">+ Add Supplier</button></div>
+        <div class="table-wrapper"><table><thead><tr><th>Supplier</th><th>Phone</th><th>VAT No.</th><th>Payables</th><th>Receivables</th><th>Actions</th></tr></thead><tbody id="supplierBody"></tbody></table></div></div>
+      </section>
+      <section id="supplierBillsSection" style="display:none">
+        <div class="card"><div class="section-title"><h2>Purchases</h2><button class="btn-primary" onclick="openPurchaseModal()">+ Add Purchase</button></div>
+        <p class="helper-text">Record goods bought from a supplier. Stock is added to Inventory automatically and the total is added to the supplier's payables.</p>
+        <div class="table-wrapper"><table><thead><tr><th>Purchase No.</th><th>Date</th><th>Supplier</th><th>Goods</th><th>Total</th><th>Actions</th></tr></thead><tbody id="supplierBillsBody"></tbody></table></div></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Company Settings Modal -->
+  <div class="modal" id="companyModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Edit Company Settings</h2>
+        <button class="close-button" onclick="closeModal('companyModal')">&times;</button>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group full">
+          <label for="companyInput">Company Name</label>
+          <input type="text" id="companyInput" placeholder="Enter company name" />
+        </div>
+
+        <div class="form-group">
+          <label for="companyEmailInput">Company Email</label>
+          <input type="email" id="companyEmailInput" placeholder="email@example.com" />
+        </div>
+
+        <div class="form-group">
+          <label for="companyPhoneInput">Company Phone</label>
+          <input type="text" id="companyPhoneInput" placeholder="+971..." />
+        </div>
+
+        <div class="form-group">
+          <label for="companyVatInput">Company VAT Number</label>
+          <input type="text" id="companyVatInput" placeholder="TRN / VAT number" />
+        </div>
+        <div class="form-group">
+          <label for="companyLicenseInput">Company Licence Number</label>
+          <input type="text" id="companyLicenseInput" placeholder="Trade licence number" />
+        </div>
+        <div class="form-group full">
+          <label for="companyLogoInput">Company Logo</label>
+          <input type="file" id="companyLogoInput" accept="image/*" />
+        </div>
+        <div class="form-group full">
+          <label for="companyAddressInput">Company Address</label>
+          <input type="text" id="companyAddressInput" placeholder="Company address" />
+        </div>
+
+        <div class="form-group">
+          <label for="defaultTaxInput">Default Tax Percentage</label>
+          <input type="number" id="defaultTaxInput" min="0" max="100" step="0.01" />
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-danger" onclick="resetEntireSystem()">Reset Entire System</button>
+        <button class="btn-secondary" onclick="closeModal('companyModal')">Cancel</button>
+        <button class="btn-primary" onclick="saveCompanySettings()">Save Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Invoice Modal -->
+  <div class="modal" id="invoiceModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="invoiceModalTitle">Create Invoice</h2>
+        <button class="close-button" onclick="closeModal('invoiceModal')">&times;</button>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="customerName">Customer Name</label>
+          <input type="text" id="customerName" placeholder="Customer name" />
+        </div>
+
+        <div class="form-group">
+          <label for="customerPhone">Customer Phone Number</label>
+          <input type="tel" id="customerPhone" placeholder="+971..." />
+        </div>
+
+        <div class="form-group">
+          <label for="customerVat">Customer VAT Number</label>
+          <input type="text" id="customerVat" placeholder="TRN / VAT number" />
+        </div>
+        <div class="form-group">
+          <label for="invoiceDate">Invoice Date</label>
+          <input type="date" id="invoiceDate" />
+        </div>
+
+        <div class="form-group">
+          <label for="paymentStatus">Payment Status</label>
+          <select id="paymentStatus">
+            <option value="paid">Paid</option>
+            <option value="pending">Pending</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="invoiceTax">Tax Percentage</label>
+          <input type="number" id="invoiceTax" min="0" max="100" step="0.01" />
+        </div>
+
+        <div class="form-group">
+          <label for="invoiceDiscount">Discount AED</label>
+          <input type="number" id="invoiceDiscount" min="0" step="0.01" value="0" />
+        </div>
+
+        <div class="form-group full">
+          <label for="invoiceNotes">Notes</label>
+          <input type="text" id="invoiceNotes" placeholder="Additional invoice notes" />
+        </div>
+      </div>
+
+      <div class="invoice-items">
+        <div class="section-title">
+          <h3>Invoice Products</h3>
+          <button class="btn-success" onclick="addInvoiceItem()">+ Add Product</button>
+        </div>
+
+        <div id="invoiceItemsContainer"></div>
+      </div>
+
+      <div class="invoice-summary">
+        <div>Subtotal: <span id="invoiceSubtotal">AED 0.00</span></div>
+        <div>Tax: <span id="invoiceTaxAmount">AED 0.00</span></div>
+        <div>Discount: <span id="invoiceDiscountAmount">AED 0.00</span></div>
+        <div><strong>Total: <span id="invoiceTotal">AED 0.00</span></strong></div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeModal('invoiceModal')">Cancel</button>
+        <button class="btn-primary" onclick="saveInvoice()">Save Invoice</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Edit Product Modal -->
+  <div class="modal" id="productModal">
+    <div class="modal-content">
+      <div class="modal-header"><h2 id="productModalTitle">Edit Product</h2><button class="close-button" onclick="closeModal('productModal')">&times;</button></div>
+      <div class="form-grid">
+        <div class="form-group full"><label for="prodName">Product Name</label><input type="text" id="prodName" /></div>
+        <div class="form-group"><label for="prodSku">SKU</label><input type="text" id="prodSku" /></div>
+        <div class="form-group"><label for="prodSupplier">Supplier</label><input type="text" id="prodSupplier" list="supplierList" /></div>
+        <div class="form-group"><label for="prodStock">Stock Quantity</label><input type="number" id="prodStock" step="any" /></div>
+        <div class="form-group"><label for="prodBuy">Buying Rate (AED)</label><input type="number" id="prodBuy" min="0" step="0.01" /></div>
+        <div class="form-group"><label for="prodSell">Selling Rate (AED)</label><input type="number" id="prodSell" min="0" step="0.01" /></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-danger" id="prodDeleteBtn" onclick="deleteProduct()">Delete</button>
+        <button class="btn-secondary" onclick="closeModal('productModal')">Cancel</button>
+        <button class="btn-primary" onclick="saveProduct()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Purchase Modal -->
+  <div class="modal" id="purchaseModal">
+    <div class="modal-content">
+      <div class="modal-header"><h2>Add Purchase</h2><button class="close-button" onclick="closeModal('purchaseModal')">&times;</button></div>
+      <div class="form-grid">
+        <div class="form-group"><label for="purSupplier">Supplier Name</label><input type="text" id="purSupplier" list="supplierList" placeholder="Type supplier name" autocomplete="off" /></div>
+        <div class="form-group"><label for="purDate">Date</label><input type="date" id="purDate" /></div>
+      </div>
+      <div class="invoice-items">
+        <div class="section-title"><h3>Goods Purchased</h3><button class="btn-success" onclick="addPurchaseItem()">+ Add Goods</button></div>
+        <div id="purchaseItemsContainer"></div>
+      </div>
+      <div class="invoice-summary"><div><strong>Total: <span id="purTotal">AED 0.00</span></strong></div></div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeModal('purchaseModal')">Cancel</button>
+        <button class="btn-primary" onclick="savePurchase()">Save Purchase</button>
+      </div>
+    </div>
+  </div>
+  <datalist id="productList"></datalist>
+  <datalist id="supplierList"></datalist>
+
+  <!-- Invoice Preview Modal -->
+  <div class="modal" id="previewModal">
+    <div class="invoice-preview" id="invoicePreview">
+      <div class="modal-actions" style="margin-top: 0; margin-bottom: 20px;">
+        <button class="btn-secondary" onclick="closeModal('previewModal')">Close</button>
+        <button class="btn-primary" onclick="window.print()">Save / Print PDF</button>
+        <button class="btn-success" onclick="shareInvoiceWhatsApp()">Share WhatsApp</button>
+      </div>
+
+      <div class="invoice-preview-header">
+        <div>
+          <h1 id="previewCompanyName">Your Company</h1>
+          <p id="previewCompanyAddress"></p>
+          <p id="previewCompanyContact"></p>
+          <p id="previewCompanyVat"></p><p id="previewCompanyLicense"></p>
+          <img id="previewCompanyLogo" style="max-width:160px;max-height:100px;display:none;margin-top:8px;-webkit-print-color-adjust:exact;print-color-adjust:exact" />
+        </div>
+
+        <div style="text-align: right; white-space:nowrap; flex:none;">
+          <h2>INVOICE</h2>
+          <p style="white-space:nowrap;">Invoice No: <strong id="previewInvoiceNumber"></strong></p>
+          <p style="white-space:nowrap;">Date: <strong id="previewInvoiceDate"></strong></p>
+        </div>
+      </div>
+
+      <div>
+        <h3>Bill To:</h3>
+        <p id="previewCustomer"></p>
+        <p id="previewCustomerPhone"></p>
+        <p id="previewCustomerVat"></p>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody id="previewItems"></tbody>
+      </table>
+
+      <div class="total-box">
+        <p>Subtotal: <strong id="previewSubtotal"></strong></p>
+        <p>Tax: <strong id="previewTax"></strong></p>
+        <p>Discount: <strong id="previewDiscount"></strong></p>
+        <h2>Total: <strong id="previewTotal"></strong></h2>
+      </div>
+
+      <p id="previewNotes" style="margin-top: 30px;"></p>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    const CURRENCY = "AED";
+
+    let invoices = JSON.parse(localStorage.getItem("billingInvoices")) || [];
+
+    let company = JSON.parse(localStorage.getItem("billingCompany")) || {
+      name: "Your Company",
+      email: "",
+      phone: "",
+      address: "",
+      vat: "",
+      license: "",
+      logo: "",
+      defaultTax: 5
+    };
+
+    let editingInvoiceId = null;
+    let customers = JSON.parse(localStorage.getItem("billingCustomers") || "[]");
+    let products = JSON.parse(localStorage.getItem("billingProducts") || "[]");
+    let suppliers = JSON.parse(localStorage.getItem("billingSuppliers") || "[]");
+    let supplierBills = JSON.parse(localStorage.getItem("billingSupplierBills") || "[]");
+
+    function money(value) {
+      return `${CURRENCY} ${Number(value || 0).toFixed(2)}`;
+    }
+
+    function generateInvoiceNumber() {
+      const number = invoices.length + 1;
+      return "INV-" + String(number).padStart(5, "0");
+    }
+
+    function todayDate() {
+      return new Date().toISOString().split("T")[0];
+    }
+
+    function saveData() {
+      localStorage.setItem("billingInvoices", JSON.stringify(invoices));
+      localStorage.setItem("billingCompany", JSON.stringify(company));
+      localStorage.setItem("billingCustomers", JSON.stringify(customers));
+      localStorage.setItem("billingProducts", JSON.stringify(products));
+      localStorage.setItem("billingSuppliers", JSON.stringify(suppliers));
+      localStorage.setItem("billingSupplierBills", JSON.stringify(supplierBills));
+    }
+
+    function escapeHTML(value) {
+      return String(value || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function getInvoiceTotals(invoice) {
+      const subtotal = invoice.items.reduce((sum, item) => {
+        return sum + Number(item.quantity) * Number(item.price);
+      }, 0);
+
+      const taxAmount = subtotal * (Number(invoice.tax) / 100);
+      const discount = Number(invoice.discount || 0);
+      const total = subtotal + taxAmount - discount;
+
+      return {
+        subtotal,
+        taxAmount,
+        discount,
+        total
+      };
+    }
+
+    function parseDate(dateString) {
+      return new Date(dateString + "T00:00:00");
+    }
+
+    function isToday(dateString) {
+      return dateString === todayDate();
+    }
+
+    function isThisWeek(dateString) {
+      const date = parseDate(dateString);
+      const today = new Date();
+
+      const start = new Date(today);
+      const day = start.getDay();
+      const difference = day === 0 ? 6 : day - 1;
+
+      start.setDate(start.getDate() - difference);
+      start.setHours(0, 0, 0, 0);
+
+      const end = new Date(start);
+      end.setDate(end.getDate() + 7);
+
+      return date >= start && date < end;
+    }
+
+    function isThisMonth(dateString) {
+      const date = parseDate(dateString);
+      const today = new Date();
+
+      return (
+        date.getFullYear() === today.getFullYear() &&
+        date.getMonth() === today.getMonth()
+      );
+    }
+
+    function invoiceMatchesPeriod(invoice, period) {
+      if (period === "day") return isToday(invoice.date);
+      if (period === "week") return isThisWeek(invoice.date);
+      if (period === "month") return isThisMonth(invoice.date);
+      return true;
+    }
+
+    function getPeriodInvoices(period) {
+      return invoices.filter(invoice => invoiceMatchesPeriod(invoice, period));
+    }
+
+    function calculatePeriodData(period) {
+      const periodInvoices = getPeriodInvoices(period);
+
+      let sales = 0;
+      let receivables = 0;
+      let items = 0;
+
+      periodInvoices.forEach(invoice => {
+        const totals = getInvoiceTotals(invoice);
+
+        if (invoice.status === "paid") {
+          sales += totals.total;
+        } else {
+          receivables += totals.total;
+        }
+
+        invoice.items.forEach(item => {
+          items += Number(item.quantity);
+        });
+      });
+
+      return {
+        invoices: periodInvoices.length,
+        sales,
+        receivables,
+        items
+      };
+    }
+
+    function renderDashboard() {
+      const day = calculatePeriodData("day");
+      const week = calculatePeriodData("week");
+      const month = calculatePeriodData("month");
+
+      document.getElementById("todaySales").textContent = money(day.sales);
+      document.getElementById("todayReceivables").textContent = money(day.receivables);
+      document.getElementById("weekSales").textContent = money(week.sales);
+      document.getElementById("monthSales").textContent = money(month.sales);
+
+      const selectedPeriod = document.getElementById("analyticsPeriod").value;
+      const selected = calculatePeriodData(selectedPeriod);
+
+      document.getElementById("selectedSales").textContent = money(selected.sales);
+      document.getElementById("selectedReceivables").textContent = money(selected.receivables);
+      document.getElementById("selectedInvoices").textContent = selected.invoices;
+      document.getElementById("selectedItems").textContent = selected.items;
+
+      renderProductAnalytics(selectedPeriod);
+    }
+
+    function renderProductAnalytics(period) {
+      const selectedInvoices = getPeriodInvoices(period);
+      const productTotals = {};
+
+      selectedInvoices.forEach(invoice => {
+        invoice.items.forEach(item => {
+          const productName = item.name.trim() || "Unnamed Product";
+
+          if (!productTotals[productName]) {
+            productTotals[productName] = 0;
+          }
+
+          productTotals[productName] += Number(item.quantity);
+        });
+      });
+
+      const products = Object.entries(productTotals)
+        .map(([name, quantity]) => ({ name, quantity }))
+        .sort((a, b) => b.quantity - a.quantity);
+
+      const bestList = document.getElementById("bestSellingList");
+      const leastList = document.getElementById("leastSellingList");
+
+      if (products.length === 0) {
+        bestList.innerHTML = '<li class="empty-state">No product sales found</li>';
+        leastList.innerHTML = '<li class="empty-state">No product sales found</li>';
+        return;
+      }
+
+      bestList.innerHTML = products
+        .slice(0, 5)
+        .map(product => `
+          <li>
+            <span>${escapeHTML(product.name)}</span>
+            <span class="product-value">${product.quantity} units</span>
+          </li>
+        `)
+        .join("");
+
+      leastList.innerHTML = products
+        .slice(-5)
+        .reverse()
+        .map(product => `
+          <li>
+            <span>${escapeHTML(product.name)}</span>
+            <span class="product-value">${product.quantity} units</span>
+          </li>
+        `)
+        .join("");
+    }
+
+    function renderInvoices() {
+      const body = document.getElementById("invoiceTableBody");
+
+      if (invoices.length === 0) {
+        body.innerHTML = `
+          <tr>
+            <td colspan="7" class="empty-state">No invoices created yet</td>
+          </tr>
+        `;
+        return;
+      }
+
+      body.innerHTML = invoices
+        .slice()
+        .reverse()
+        .map(invoice => {
+          const totals = getInvoiceTotals(invoice);
+
+          return `
+            <tr>
+              <td>${escapeHTML(invoice.number)}</td>
+              <td>${escapeHTML(invoice.date)}</td>
+              <td>${escapeHTML(invoice.customer)}</td>
+              <td>${money(totals.total)}</td>
+              <td>${Number(invoice.tax).toFixed(2)}%</td>
+              <td>
+                <span class="status ${invoice.status}">
+                  ${invoice.status === "paid" ? "Paid" : "Pending"}
+                </span>
+              </td>
+              <td>
+                <button class="btn-secondary" onclick="previewInvoice('${invoice.id}')">
+                  View
+                </button>
+                <button class="btn-secondary" onclick="editInvoice('${invoice.id}')">
+                  Edit
+                </button>
+                <button class="btn-danger" onclick="deleteInvoice('${invoice.id}')">
+                  Delete
+                </button>
+              </td>
+            </tr>
+          `;
+        })
+        .join("");
+    }
+
+    function openCompanyModal() {
+      setActiveNav("Settings");
+      document.getElementById("companyInput").value = company.name;
+      document.getElementById("companyEmailInput").value = company.email;
+      document.getElementById("companyPhoneInput").value = company.phone;
+      document.getElementById("companyVatInput").value = company.vat || "";
+      document.getElementById("companyLicenseInput").value = company.license || "";
+      document.getElementById("companyAddressInput").value = company.address;
+      document.getElementById("defaultTaxInput").value = company.defaultTax;
+
+      document.getElementById("companyModal").classList.add("show");
+    }
+
+    function saveCompanySettings() {
+      company = {
+        name: document.getElementById("companyInput").value.trim() || "Your Company",
+        email: document.getElementById("companyEmailInput").value.trim(),
+        phone: document.getElementById("companyPhoneInput").value.trim(),
+        vat: document.getElementById("companyVatInput").value.trim(),
+        license: document.getElementById("companyLicenseInput").value.trim(),
+        logo: company.logo || "",
+        address: document.getElementById("companyAddressInput").value.trim(),
+        defaultTax: Number(document.getElementById("defaultTaxInput").value || 0)
+      };
+
+      saveData();
+      updateCompanyDisplay();
+      closeModal("companyModal");
+    }
+
+    function updateCompanyDisplay() {
+      document.getElementById("companyNameDisplay").textContent = company.name;
+    }
+
+    function openInvoiceModal(invoice = null) {
+      editingInvoiceId = invoice ? invoice.id : null;
+
+      document.getElementById("invoiceModalTitle").textContent =
+        invoice ? "Edit Invoice" : "Create Invoice";
+
+      document.getElementById("customerName").value = invoice?.customer || "";
+      document.getElementById("customerPhone").value = invoice?.customerPhone || "";
+      document.getElementById("customerVat").value = invoice?.customerVat || "";
+      document.getElementById("invoiceDate").value = invoice?.date || todayDate();
+      document.getElementById("paymentStatus").value = invoice?.status || "paid";
+      document.getElementById("invoiceTax").value =
+        invoice?.tax !== undefined ? invoice.tax : company.defaultTax;
+      document.getElementById("invoiceDiscount").value = invoice?.discount || 0;
+      document.getElementById("invoiceNotes").value = invoice?.notes || "";
+
+      const container = document.getElementById("invoiceItemsContainer");
+      container.innerHTML = "";
+
+      if (invoice && invoice.items.length > 0) {
+        invoice.items.forEach(item => addInvoiceItem(item));
+      } else {
+        addInvoiceItem();
+      }
+
+      updateInvoiceSummary();
+      document.getElementById("invoiceModal").classList.add("show");
+    }
+
+    function addInvoiceItem(item = {}) {
+      const container = document.getElementById("invoiceItemsContainer");
+
+      const row = document.createElement("div");
+      row.className = "invoice-item";
+
+      row.innerHTML = `
+        <input type="text" class="item-name" placeholder="Product name" value="${escapeHTML(item.name || "")}" />
+        <input type="number" class="item-quantity" min="1" step="1" placeholder="Quantity" value="${item.quantity || 1}" />
+        <input type="number" class="item-price" min="0" step="0.01" placeholder="Price AED" value="${item.price || 0}" />
+        <input type="text" class="item-total" value="${money(Number(item.quantity || 1) * Number(item.price || 0))}" readonly />
+        <button type="button" class="btn-danger" onclick="removeInvoiceItem(this)">Remove</button>
+      `;
+
+      row.querySelector(".item-quantity").addEventListener("input", updateInvoiceSummary);
+      row.querySelector(".item-price").addEventListener("input", updateInvoiceSummary);
+
+      container.appendChild(row);
+      updateInvoiceSummary();
+    }
+
+    function removeInvoiceItem(button) {
+      button.closest(".invoice-item").remove();
+      updateInvoiceSummary();
+    }
+
+    function getFormItems() {
+      return Array.from(document.querySelectorAll(".invoice-item"))
+        .map(row => ({
+          name: row.querySelector(".item-name").value.trim(),
+          quantity: Number(row.querySelector(".item-quantity").value || 0),
+          price: Number(row.querySelector(".item-price").value || 0)
+        }))
+        .filter(item => item.name && item.quantity > 0);
+    }
+
+    function updateInvoiceSummary() {
+      let subtotal = 0;
+
+      document.querySelectorAll(".invoice-item").forEach(row => {
+        const quantity = Number(row.querySelector(".item-quantity").value || 0);
+        const price = Number(row.querySelector(".item-price").value || 0);
+        const total = quantity * price;
+
+        row.querySelector(".item-total").value = money(total);
+        subtotal += total;
+      });
+
+      const tax = Number(document.getElementById("invoiceTax").value || 0);
+      const discount = Number(document.getElementById("invoiceDiscount").value || 0);
+      const taxAmount = subtotal * tax / 100;
+      const total = subtotal + taxAmount - discount;
+
+      document.getElementById("invoiceSubtotal").textContent = money(subtotal);
+      document.getElementById("invoiceTaxAmount").textContent = money(taxAmount);
+      document.getElementById("invoiceDiscountAmount").textContent = money(discount);
+      document.getElementById("invoiceTotal").textContent = money(total);
+    }
+
+    function saveInvoice() {
+      const customer = document.getElementById("customerName").value.trim();
+      const items = getFormItems();
+
+      if (!customer) {
+        alert("Please enter the customer name.");
+        return;
+      }
+
+      if (items.length === 0) {
+        alert("Please add at least one valid product.");
+        return;
+      }
+
+      const invoiceData = {
+        id: editingInvoiceId || crypto.randomUUID(),
+        number: editingInvoiceId
+          ? invoices.find(invoice => invoice.id === editingInvoiceId).number
+          : generateInvoiceNumber(),
+        customer,
+        customerPhone: document.getElementById("customerPhone").value.trim(),
+        customerVat: document.getElementById("customerVat").value.trim(),
+        date: document.getElementById("invoiceDate").value || todayDate(),
+        status: document.getElementById("paymentStatus").value,
+        tax: Number(document.getElementById("invoiceTax").value || 0),
+        discount: Number(document.getElementById("invoiceDiscount").value || 0),
+        notes: document.getElementById("invoiceNotes").value.trim(),
+        items
+      };
+
+      if (editingInvoiceId) {
+        const index = invoices.findIndex(invoice => invoice.id === editingInvoiceId);
+        invoices[index] = invoiceData;
+      } else {
+        invoices.push(invoiceData);
+      }
+
+      const customerRecord = {name:customer, phone:invoiceData.customerPhone, vat:invoiceData.customerVat};
+      const customerIndex = customers.findIndex(c => c.name.toLowerCase() === customer.toLowerCase());
+      if (customerIndex >= 0) customers[customerIndex] = {...customers[customerIndex], ...customerRecord}; else customers.push({...customerRecord,openingReceivable:0,openingPayable:0});
+      invoiceData.items.forEach(item => {
+        let p = products.find(x => x.name.toLowerCase() === item.name.toLowerCase());
+        if (!p) products.push({name:item.name, sku:"", stock:0, buyingRate:0, sellingRate:item.price});
+        else p.sellingRate = item.price;
+      });
+      saveData();
+      closeModal("invoiceModal");
+      renderInvoices();
+      renderDashboard();
+      renderCustomers();
+
+      editingInvoiceId = null;
+    }
+
+    function editInvoice(id) {
+      const invoice = invoices.find(item => item.id === id);
+      if (invoice) {
+        openInvoiceModal(invoice);
+      }
+    }
+
+    function deleteInvoice(id) {
+      const invoice = invoices.find(item => item.id === id);
+
+      if (!invoice) return;
+
+      if (confirm(`Delete invoice ${invoice.number}?`)) {
+        invoices = invoices.filter(item => item.id !== id);
+        saveData();
+        renderInvoices();
+        renderDashboard();
+        renderCustomers();
+      }
+    }
+
+    function previewInvoice(id) {
+      const invoice = invoices.find(item => item.id === id);
+      if (!invoice) return;
+
+      const totals = getInvoiceTotals(invoice);
+      window.currentPreviewInvoiceId = id;
+
+      document.getElementById("previewCompanyName").textContent = company.name;
+      document.getElementById("previewCompanyAddress").textContent = company.address;
+      document.getElementById("previewCompanyContact").textContent =
+        [company.email, company.phone].filter(Boolean).join(" | ");
+      document.getElementById("previewCompanyVat").textContent = company.vat ? "VAT No: " + company.vat : "";
+      document.getElementById("previewCompanyLicense").textContent = company.license ? "Licence No: " + company.license : "";
+      const logoEl = document.getElementById("previewCompanyLogo");
+      logoEl.src = company.logo || ""; logoEl.style.display = company.logo ? "block" : "none";
+
+      document.getElementById("previewInvoiceNumber").textContent = invoice.number;
+      document.getElementById("previewInvoiceDate").textContent = invoice.date;
+      document.getElementById("previewCustomer").textContent = invoice.customer;
+      document.getElementById("previewCustomerPhone").textContent = invoice.customerPhone || "";
+      document.getElementById("previewCustomerVat").textContent = invoice.customerVat ? "VAT No: " + invoice.customerVat : "";
+
+      document.getElementById("previewItems").innerHTML = invoice.items
+        .map(item => `
+          <tr>
+            <td>${escapeHTML(item.name)}</td>
+            <td>${item.quantity}</td>
+            <td>${money(item.price)}</td>
+            <td>${money(item.quantity * item.price)}</td>
+          </tr>
+        `)
+        .join("");
+
+      document.getElementById("previewSubtotal").textContent = money(totals.subtotal);
+      document.getElementById("previewTax").textContent =
+        `${money(totals.taxAmount)} (${Number(invoice.tax).toFixed(2)}%)`;
+      document.getElementById("previewDiscount").textContent = money(totals.discount);
+      document.getElementById("previewTotal").textContent = money(totals.total);
+      document.getElementById("previewNotes").textContent = invoice.notes || "";
+
+      document.getElementById("previewModal").classList.add("show");
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove("show");
+    }
+
+    function setActiveNav(label) {
+      document.querySelectorAll(".nav-button").forEach(button => button.classList.toggle("active", button.textContent.trim().toLowerCase().includes(label.toLowerCase())));
+    }
+    function showDashboard() {
+      ["dashboardSection","customersSection","inventorySection","suppliersSection","supplierBillsSection"].forEach(id => document.getElementById(id).style.display = id==="dashboardSection" ? "block":"none");
+      setActiveNav("Dashboard");
+      renderDashboard(); renderInvoices();
+    }
+
+    document.getElementById("invoiceTax").addEventListener("input", updateInvoiceSummary);
+    document.getElementById("invoiceDiscount").addEventListener("input", updateInvoiceSummary);
+
+    window.addEventListener("click", event => {
+      document.querySelectorAll(".modal").forEach(modal => {
+        if (event.target === modal) {
+          modal.classList.remove("show");
+        }
+      });
+    });
+
+
+    document.getElementById("companyLogoInput").addEventListener("change", event => {
+      const file = event.target.files[0]; if (!file) return;
+      const reader = new FileReader(); reader.onload = () => { company.logo = reader.result; }; reader.readAsDataURL(file);
+    });
+    function showSection(id) {
+      ["dashboardSection","customersSection","inventorySection","suppliersSection","supplierBillsSection"].forEach(sectionId => document.getElementById(sectionId).style.display = sectionId===id ? "block":"none");
+      const labels = {customersSection:"Customers",inventorySection:"Inventory",suppliersSection:"Suppliers",supplierBillsSection:"Purchases"};
+      setActiveNav(labels[id] || "");
+      if(id==="customersSection") renderCustomers();
+      if(id==="inventorySection") renderInventory();
+      if(id==="suppliersSection") renderSuppliers();
+      if(id==="supplierBillsSection") renderSupplierBills();
+    }
+    let editingProductIndex = null;
+    function refreshLists(){
+      document.getElementById("productList").innerHTML=products.map(p=>`<option value="${escapeHTML(p.name)}">`).join("");
+      document.getElementById("supplierList").innerHTML=suppliers.map(x=>`<option value="${escapeHTML(x.name)}">`).join("");
+    }
+    function addProduct() {
+      editingProductIndex=null;refreshLists();
+      document.getElementById("productModalTitle").textContent="Add Product";
+      ["prodName","prodSku","prodSupplier"].forEach(id=>document.getElementById(id).value="");
+      document.getElementById("prodStock").value=0;document.getElementById("prodBuy").value=0;document.getElementById("prodSell").value=0;
+      document.getElementById("prodDeleteBtn").style.display="none";
+      document.getElementById("productModal").classList.add("show");
+    }
+    function editProduct(index){
+      const p=products[index];if(!p)return;editingProductIndex=index;refreshLists();
+      document.getElementById("productModalTitle").textContent="Edit Product";
+      document.getElementById("prodName").value=p.name||"";document.getElementById("prodSku").value=p.sku||"";
+      document.getElementById("prodSupplier").value=p.supplier||"";document.getElementById("prodStock").value=Number(p.stock||0);
+      document.getElementById("prodBuy").value=Number(p.buyingRate||0);document.getElementById("prodSell").value=Number(p.sellingRate||0);
+      document.getElementById("prodDeleteBtn").style.display="inline-block";
+      document.getElementById("productModal").classList.add("show");
+    }
+    function saveProduct(){
+      const name=document.getElementById("prodName").value.trim();if(!name){alert("Enter a product name.");return;}
+      const stock=Number(document.getElementById("prodStock").value||0),buy=Number(document.getElementById("prodBuy").value||0),sell=Number(document.getElementById("prodSell").value||0);
+      if(!Number.isFinite(stock)||!Number.isFinite(buy)||!Number.isFinite(sell)||buy<0||sell<0){alert("Enter valid numbers.");return;}
+      const dup=products.findIndex((x,i)=>i!==editingProductIndex&&x.name.toLowerCase()===name.toLowerCase());
+      if(dup>=0){alert("A product with this name already exists.");return;}
+      const data={name,sku:document.getElementById("prodSku").value.trim(),supplier:document.getElementById("prodSupplier").value.trim(),stock,buyingRate:buy,sellingRate:sell};
+      if(editingProductIndex===null)products.push(data);else products[editingProductIndex]=Object.assign(products[editingProductIndex],data);
+      saveData();renderInventory();closeModal("productModal");
+    }
+    function deleteProduct(){
+      if(editingProductIndex===null)return;if(!confirm("Delete this product from inventory?"))return;
+      products.splice(editingProductIndex,1);saveData();renderInventory();closeModal("productModal");
+    }
+    function renderInventory(){document.getElementById("inventoryBody").innerHTML=products.map((p,i)=>`<tr><td>${escapeHTML(p.name)}</td><td>${escapeHTML(p.sku||"")}</td><td>${escapeHTML(p.supplier||"-")}</td><td>${Number(p.stock||0)}</td><td>${money(p.buyingRate||0)}</td><td>${money(p.sellingRate||0)}</td><td><button class="btn-secondary" onclick="editProduct(${i})">Edit</button></td></tr>`).join("")||'<tr><td colspan="7" class="empty-state">No products</td></tr>';}
+    function addCustomer(){
+      const name=prompt("Customer name?"); if(!name)return;
+      const phone=prompt("Customer phone?")||"", vat=prompt("Customer VAT number?")||"";
+      const openingReceivable=Number(prompt("Opening receivable (AED) - amount customer owes you:", "0")||0);
+      const openingPayable=Number(prompt("Opening payable (AED) - amount you owe customer:", "0")||0);
+      customers.push({name,phone,vat,openingReceivable:Math.max(0,openingReceivable),openingPayable:Math.max(0,openingPayable)});
+      saveData(); renderCustomers();
+    }
+    function customerBalances(c){
+      const related=invoices.filter(i=>(i.customer||"").toLowerCase()===(c.name||"").toLowerCase());
+      const receivables=related.filter(i=>i.status!=="paid").reduce((sum,i)=>sum+getInvoiceTotals(i).total,0)+Number(c.openingReceivable||0);
+      return {receivables,payables:Number(c.openingPayable||0)};
+    }
+    function renderCustomers(){
+      document.getElementById("customerBody").innerHTML=customers.map((c,i)=>{
+        const b=customerBalances(c);
+        return `<tr><td>${escapeHTML(c.name)}</td><td>${escapeHTML(c.phone||"")}</td><td>${escapeHTML(c.vat||"")}</td><td class="${b.receivables>0?'balance-positive':'balance-clear'}">${money(b.receivables)}</td><td>${money(b.payables)}</td><td><button class="btn-secondary" onclick="editCustomerBalances(${i})">Edit balances</button></td></tr>`;
+      }).join("")||'<tr><td colspan="6" class="empty-state">No customers yet. Add a customer or create an invoice to register one.</td></tr>';
+    }
+    function editCustomerBalances(index){
+      const c=customers[index]; if(!c)return;
+      const r=prompt("Opening receivable (AED):",Number(c.openingReceivable||0)); if(r===null)return;
+      const p=prompt("Opening payable (AED):",Number(c.openingPayable||0)); if(p===null)return;
+      if(!Number.isFinite(Number(r))||Number(r)<0||!Number.isFinite(Number(p))||Number(p)<0){alert("Enter valid non-negative amounts.");return;}
+      c.openingReceivable=Number(r);c.openingPayable=Number(p);saveData();renderCustomers();
+    }
+    function addSupplier(){
+      const name=prompt("Supplier name?");if(!name)return;
+      const phone=prompt("Supplier phone?")||"", vat=prompt("Supplier VAT number?")||"";
+      const openingPayable=Number(prompt("Opening payable (AED) - amount you owe supplier:", "0")||0);
+      const openingReceivable=Number(prompt("Opening receivable (AED) - amount supplier owes you:", "0")||0);
+      suppliers.push({name,phone,vat,openingPayable:Math.max(0,openingPayable),openingReceivable:Math.max(0,openingReceivable)});
+      saveData();renderSuppliers();
+    }
+    function renderSuppliers(){
+      document.getElementById("supplierBody").innerHTML=suppliers.map((supplier,i)=>{
+        const billPayable=supplierBills.filter(b=>b.supplier===supplier.name).reduce((a,b)=>a+Number(b.total||0),0);
+        const payable=billPayable+Number(supplier.openingPayable||0);
+        const receivable=Number(supplier.openingReceivable||0);
+        return `<tr><td>${escapeHTML(supplier.name)}</td><td>${escapeHTML(supplier.phone||"")}</td><td>${escapeHTML(supplier.vat||"")}</td><td class="${payable>0?'balance-positive':'balance-clear'}">${money(payable)}</td><td>${money(receivable)}</td><td><button class="btn-secondary" onclick="editSupplierBalances(${i})">Edit balances</button></td></tr>`;
+      }).join("")||'<tr><td colspan="6" class="empty-state">No suppliers yet. Add a supplier to get started.</td></tr>';
+    }
+    function editSupplierBalances(index){
+      const supplier=suppliers[index];if(!supplier)return;
+      const p=prompt("Opening payable (AED):",Number(supplier.openingPayable||0));if(p===null)return;
+      const r=prompt("Opening receivable (AED):",Number(supplier.openingReceivable||0));if(r===null)return;
+      if(!Number.isFinite(Number(p))||Number(p)<0||!Number.isFinite(Number(r))||Number(r)<0){alert("Enter valid non-negative amounts.");return;}
+      supplier.openingPayable=Number(p);supplier.openingReceivable=Number(r);saveData();renderSuppliers();
+    }
+    // Older single-product supplier bills are converted to the purchase format
+    supplierBills=supplierBills.map(b=>b.items?b:{number:b.number,date:b.date||"",supplier:b.supplier,items:[{name:b.product,quantity:Number(b.quantity||0),rate:Number(b.rate||0)}],total:Number(b.total||0)});
+    function openPurchaseModal(){
+      refreshLists();
+      document.getElementById("purSupplier").value="";
+      document.getElementById("purDate").value=todayDate();
+      document.getElementById("purchaseItemsContainer").innerHTML="";addPurchaseItem();updatePurchaseTotal();
+      document.getElementById("purchaseModal").classList.add("show");
+    }
+    function addPurchaseItem(){
+      const row=document.createElement("div");row.className="invoice-item";row.style.gridTemplateColumns="2fr 1fr 1fr auto";
+      row.innerHTML='<input type="text" class="pi-name" list="productList" placeholder="Goods / product name" /><input type="number" class="pi-qty" min="0" step="any" placeholder="Qty" value="1" /><input type="number" class="pi-rate" min="0" step="0.01" placeholder="Rate AED" /><button class="btn-danger" type="button">&times;</button>';
+      row.querySelector(".pi-name").addEventListener("change",e=>{const p=products.find(x=>x.name.toLowerCase()===e.target.value.trim().toLowerCase());if(p&&!row.querySelector(".pi-rate").value){row.querySelector(".pi-rate").value=Number(p.buyingRate||0);updatePurchaseTotal();}});
+      row.addEventListener("input",updatePurchaseTotal);
+      row.querySelector("button").onclick=()=>{row.remove();updatePurchaseTotal();};
+      document.getElementById("purchaseItemsContainer").appendChild(row);
+    }
+    function readPurchaseItems(){
+      return [...document.querySelectorAll("#purchaseItemsContainer .invoice-item")].map(r=>({name:r.querySelector(".pi-name").value.trim(),quantity:Number(r.querySelector(".pi-qty").value||0),rate:Number(r.querySelector(".pi-rate").value||0)}));
+    }
+    function updatePurchaseTotal(){
+      const t=readPurchaseItems().reduce((a,i)=>a+i.quantity*i.rate,0);
+      document.getElementById("purTotal").textContent=money(t);
+    }
+    function savePurchase(){
+      let supplier=document.getElementById("purSupplier").value.trim();
+      if(!supplier){alert("Enter the supplier name.");return;}
+      const date=document.getElementById("purDate").value||todayDate();
+      const items=readPurchaseItems().filter(i=>i.name||i.quantity||i.rate);
+      if(!items.length){alert("Add at least one item.");return;}
+      if(items.some(i=>!i.name||!(i.quantity>0)||!(i.rate>=0))){alert("Each item needs a name, a quantity above 0 and a valid rate.");return;}
+      const total=items.reduce((a,i)=>a+i.quantity*i.rate,0);
+      // Use the existing supplier record if the name matches, otherwise register a new supplier
+      const existing=suppliers.find(x=>x.name.toLowerCase()===supplier.toLowerCase());
+      if(existing){supplier=existing.name;}
+      else{suppliers.push({name:supplier,phone:"",vat:"",openingPayable:0,openingReceivable:0});}
+      const maxNo=supplierBills.reduce((m,b)=>Math.max(m,parseInt(String(b.number).replace(/\D/g,""))||0),0);
+      supplierBills.push({number:"PUR-"+String(maxNo+1).padStart(5,"0"),date,supplier,items,total});
+      items.forEach(i=>{
+        let p=products.find(x=>x.name.toLowerCase()===i.name.toLowerCase());
+        if(!p){products.push({name:i.name,sku:"",supplier,stock:i.quantity,buyingRate:i.rate,sellingRate:0});}
+        else{p.stock=Number(p.stock||0)+i.quantity;p.buyingRate=i.rate;p.supplier=supplier;}
+      });
+      saveData();renderSupplierBills();renderInventory();renderSuppliers();closeModal("purchaseModal");
+    }
+    function deletePurchase(index){
+      const b=supplierBills[index];if(!b)return;
+      if(!confirm(`Delete ${b.number}? The goods will be removed from inventory stock and the supplier payable reduced.`))return;
+      b.items.forEach(i=>{const p=products.find(x=>x.name.toLowerCase()===String(i.name).toLowerCase());if(p)p.stock=Number(p.stock||0)-Number(i.quantity||0);});
+      supplierBills.splice(index,1);saveData();renderSupplierBills();renderInventory();renderSuppliers();
+    }
+    function renderSupplierBills(){
+      document.getElementById("supplierBillsBody").innerHTML=supplierBills.map((b,i)=>`<tr><td>${escapeHTML(b.number)}</td><td>${escapeHTML(b.date||"")}</td><td>${escapeHTML(b.supplier)}</td><td>${b.items.map(it=>`${escapeHTML(it.name)} × ${it.quantity} @ ${Number(it.rate).toFixed(2)}`).join("<br>")}</td><td>${money(b.total)}</td><td><button class="btn-danger" onclick="deletePurchase(${i})">Delete</button></td></tr>`).join("")||'<tr><td colspan="6" class="empty-state">No purchases yet</td></tr>';
+    }
+    async function shareInvoiceWhatsApp(){
+      const invoice=invoices.find(i=>i.id===window.currentPreviewInvoiceId);if(!invoice){alert("Open invoice preview first.");return;}
+      if(!window.jspdf || !window.jspdf.jsPDF){alert("PDF generator is not available. Check your internet connection, then try again.");return;}
+      const {jsPDF}=window.jspdf;const doc=new jsPDF();const totals=getInvoiceTotals(invoice);
+      // Load logo (converted to PNG through a canvas so any image type works)
+      let logo=null;
+      if(company.logo){
+        try{
+          logo=await new Promise((resolve,reject)=>{
+            const img=new Image();
+            img.onload=()=>{const c=document.createElement("canvas");c.width=img.naturalWidth;c.height=img.naturalHeight;c.getContext("2d").drawImage(img,0,0);resolve({data:c.toDataURL("image/png"),w:img.naturalWidth,h:img.naturalHeight});};
+            img.onerror=reject;img.src=company.logo;
+          });
+        }catch(e){logo=null;}
+      }
+      const left=14,top=12;let y=top;let textX=left;
+      let logoBottom=top;
+      if(logo){
+        const maxW=38,maxH=30;const ratio=Math.min(maxW/logo.w,maxH/logo.h);
+        const lw=logo.w*ratio,lh=logo.h*ratio;
+        doc.addImage(logo.data,"PNG",left,top,lw,lh);
+        textX=left+lw+6;logoBottom=top+lh;
+      }
+      // Company name: wrapped inside the left area so it never touches the invoice title
+      const nameWidth=128-textX;
+      doc.setFont(undefined,"bold");doc.setFontSize(15);
+      const nameLines=doc.splitTextToSize(company.name||"Your Company",nameWidth);
+      y=top+6;doc.text(nameLines,textX,y);y+=nameLines.length*6.2;
+      doc.setFont(undefined,"normal");doc.setFontSize(10);
+      if(company.address){doc.text(company.address,textX,y);y+=5.5;}
+      if(company.phone){doc.text("Mobile: "+company.phone,textX,y);y+=5.5;}
+      if(company.vat){doc.text("VAT No: "+company.vat,textX,y);y+=5.5;}
+      if(company.license){doc.text("Licence No: "+company.license,textX,y);y+=5.5;}
+      y=Math.max(y,logoBottom);
+      // Invoice title block on the right, right-aligned
+      doc.setFont(undefined,"bold");doc.setFontSize(16);doc.text("TAX INVOICE",196,top+6,{align:"right"});
+      doc.setFont(undefined,"normal");doc.setFontSize(10);doc.text("Invoice: "+invoice.number,196,top+14,{align:"right"});doc.text("Date: "+invoice.date,196,top+20,{align:"right"});
+      y+=3;doc.setDrawColor(0);doc.setLineWidth(0.5);doc.line(left,y,196,y);doc.setLineWidth(0.2);y+=8;
+      doc.text("Customer: "+invoice.customer,14,y);y+=6;if(invoice.customerPhone){doc.text("Phone: "+invoice.customerPhone,14,y);y+=6;}if(invoice.customerVat){doc.text("Customer VAT No: "+invoice.customerVat,14,y);y+=6;}
+      y+=4;doc.setFont(undefined,"bold");doc.text("Product",14,y);doc.text("Qty",112,y);doc.text("Rate (AED)",132,y);doc.text("Total (AED)",170,y);y+=3;doc.line(14,y,196,y);y+=7;doc.setFont(undefined,"normal");
+      invoice.items.forEach(item=>{if(y>270){doc.addPage();y=18;}doc.text(String(item.name||"").substring(0,45),14,y);doc.text(String(item.quantity),112,y);doc.text(Number(item.price).toFixed(2),132,y);doc.text((Number(item.quantity)*Number(item.price)).toFixed(2),170,y);y+=7;});
+      y+=5;doc.line(130,y,196,y);y+=8;doc.text("Subtotal: AED "+totals.subtotal.toFixed(2),145,y);y+=7;doc.text("VAT: AED "+totals.taxAmount.toFixed(2),145,y);y+=7;doc.text("Discount: AED "+totals.discount.toFixed(2),145,y);y+=9;doc.setFont(undefined,"bold");doc.text("TOTAL: AED "+totals.total.toFixed(2),145,y);y+=10;if(invoice.notes){doc.setFont(undefined,"normal");doc.text("Notes: "+invoice.notes,14,y);}
+      const blob=doc.output("blob");const file=new File([blob],`${invoice.number}.pdf`,{type:"application/pdf"});const message=`Invoice ${invoice.number} from ${company.name}. Total: ${money(totals.total)}.`;
+      if(navigator.canShare && navigator.canShare({files:[file]}) && navigator.share){
+        try{await navigator.share({files:[file],title:`Invoice ${invoice.number}`,text:message});return;}catch(err){if(err && err.name==="AbortError")return;}
+      }
+      const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=file.name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
+      window.open("https://wa.me/?text="+encodeURIComponent(message),"_blank");
+      alert("The PDF was downloaded and WhatsApp opened. Attach the downloaded PDF to the customer chat. Direct file sharing depends on your browser/device share support.");
+    }
+    function resetEntireSystem(){
+      const confirmText=prompt("This will permanently delete all invoices, customers, suppliers, supplier bills, products, and company settings from this browser. Type RESET to confirm:");
+      if(confirmText!=="RESET")return;
+      ["billingInvoices","billingCompany","billingCustomers","billingProducts","billingSuppliers","billingSupplierBills"].forEach(key=>localStorage.removeItem(key));
+      invoices=[];customers=[];products=[];suppliers=[];supplierBills=[];company={name:"Your Company",email:"",phone:"",address:"",vat:"",license:"",logo:"",defaultTax:5};saveData();
+      updateCompanyDisplay();renderInvoices();renderDashboard();renderInventory();renderSuppliers();renderSupplierBills();closeModal("companyModal");alert("System data has been reset in this browser.");
+    }
+    updateCompanyDisplay();
+    renderInvoices();
+    renderDashboard();
+    renderCustomers();
+  </script>
+</body>
+</html>
